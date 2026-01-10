@@ -1,4 +1,4 @@
-﻿namespace MpmClient
+﻿namespace MpmClient.Modules.Main.Views
 {
     partial class MainForm
     {
@@ -63,7 +63,6 @@
             MainMenuStrip = menuStripMain;
             Name = "MainForm";
             Text = "Mpm Client 0.1";
-            Load += MainForm_Load;
             ResumeLayout(false);
             PerformLayout();
         }

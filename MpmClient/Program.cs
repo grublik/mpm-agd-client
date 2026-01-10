@@ -1,3 +1,8 @@
+using MpmClient.Modules.Main.Presenters;
+using MpmClient.Modules.Main.Views;
+using MpmClient.Modules.Users.Presenters;
+using MpmClient.Modules.Users.Views;
+
 namespace MpmClient
 {
     internal static class Program
@@ -11,7 +16,14 @@ namespace MpmClient
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new MainForm());
+
+            var loginForm = new LoginForm();
+            loginForm.Tag = new LoginPresenter(loginForm);
+
+            var mainForm = new MainForm(loginForm);
+            mainForm.Tag = new MainFormPresenter(mainForm, loginForm);
+
+            Application.Run(mainForm);
         }
     }
 }
