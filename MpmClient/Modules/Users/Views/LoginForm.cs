@@ -31,7 +31,14 @@ namespace MpmClient.Modules.Users.Views
         public void SetServerAddress(string ipAddress)
         {
             txtServerAddress.Text = ipAddress;
-        }   
+
+#if DEBUG
+            // Pre-fill login credentials in debug mode for easier testing
+            txtLogin.Text = "szcko";
+            txtPassword.Text = "marian1";
+            txtServerAddress.Text= "127.0.0.1:8000";
+#endif
+        }
 
         public void ShowError(string message)
         {

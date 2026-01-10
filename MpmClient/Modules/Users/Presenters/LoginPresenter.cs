@@ -1,37 +1,83 @@
 using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using MpmClient.Api;
 using MpmClient.Modules.Users.Views;
+using MpmClient.Security;
 
 namespace MpmClient.Modules.Users.Presenters
 {
-    internal class LoginPresenter
+    internal sealed class LoginPresenter
     {
         private readonly ILoginView _view;
+        private readonly ApiClientFactory _apiClientFactory;
+        private readonly TokenStore _tokenStore;
 
-        public LoginPresenter(ILoginView view)
+        public LoginPresenter(ILoginView view, ApiClientFactory apiClientFactory, TokenStore tokenStore)
         {
             _view = view;
+            _apiClientFactory = apiClientFactory;
+            _tokenStore = tokenStore;
 
             _view.SetServerAddress(Settings.Default.MpmApiServerAddr);
             _view.LoginAttempted += OnLoginAttempted;
         }
 
-        private void OnLoginAttempted(object? sender, EventArgs e)
+        // Update the event handler signature to match nullability of EventHandler delegate
+        private async void OnLoginAttempted(object? sender, EventArgs e)
         {
-            if (Authenticate(_view.Login, _view.Password, _view.ServerAddress))
+            try
             {
+                await LoginAsync().ConfigureAwait(true);
+
                 Settings.Default.MpmApiServerAddr = _view.ServerAddress;
                 Settings.Default.Save();
+
+                if (_view is Form form)
+                {
+                    form.DialogResult = DialogResult.OK;
+                    form.Close();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                _view.ShowError("Nie poprawny login lub has³o. Spróbuj ponownie.");
+                _view.ShowError(ex.Message);
             }
         }
 
-        private bool Authenticate(string login, string password, string serverAddress)
+        private async Task LoginAsync()
         {
-            // TODO: Replace with real authentication logic
-            return !string.IsNullOrWhiteSpace(login) && !string.IsNullOrWhiteSpace(password);
+            if (string.IsNullOrWhiteSpace(_view.ServerAddress))
+                throw new InvalidOperationException("Adres serwera jest wymagany.");
+
+            if (string.IsNullOrWhiteSpace(_view.Login) || string.IsNullOrWhiteSpace(_view.Password))
+                throw new InvalidOperationException("Login i has³o s¹ wymagane.");
+
+            using var httpClient = _apiClientFactory.CreateHttpClient();
+            var tokenClient = _apiClientFactory.CreateTokenClient(_view.ServerAddress, httpClient);
+
+            // NSwag signature requires a body *and* username/password parameters.
+            // Most servers ignore the duplicated args, but we provide both for compatibility.
+            var request = new MpmTokenObtainRequest
+            {
+                Username = _view.Login,
+                Password = _view.Password
+            };
+
+            var tokenPair = await tokenClient.CreateAsync(request, _view.Login, _view.Password).ConfigureAwait(false);
+
+            // In your generated schema, tokens are typically returned via additional properties
+            // OR via strongly typed properties (depends on API).
+            // If tokens are not present, you may need to inspect the actual response schema.
+            // For now, assume typical DRF JWT: { "access": "...", "refresh": "..." } in AdditionalProperties.
+
+
+            if (string.IsNullOrWhiteSpace(tokenPair.Access) || string.IsNullOrWhiteSpace(tokenPair.Refresh))
+                throw new InvalidOperationException("Token response contains empty access/refresh tokens.");
+
+            _tokenStore.AccessToken = tokenPair.Access;
+            _tokenStore.RefreshToken = tokenPair.Refresh;
         }
     }
 }

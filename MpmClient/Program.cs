@@ -1,7 +1,9 @@
+using MpmClient.Api;
 using MpmClient.Modules.Main.Presenters;
 using MpmClient.Modules.Main.Views;
 using MpmClient.Modules.Users.Presenters;
 using MpmClient.Modules.Users.Views;
+using MpmClient.Security;
 
 namespace MpmClient
 {
@@ -17,8 +19,11 @@ namespace MpmClient
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
+            var tokenStore = new TokenStore();
+            var apiClientFactory = new ApiClientFactory(tokenStore);
+
             var loginForm = new LoginForm();
-            loginForm.Tag = new LoginPresenter(loginForm);
+            loginForm.Tag = new LoginPresenter(loginForm, apiClientFactory, tokenStore);
 
             var mainForm = new MainForm(loginForm);
             mainForm.Tag = new MainFormPresenter(mainForm, loginForm);

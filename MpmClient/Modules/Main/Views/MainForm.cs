@@ -13,7 +13,14 @@ namespace MpmClient.Modules.Main.Views
         public void ShowLoginView()
         {
             // Show the login view
-            _loginView.ShowDialog();
+            if (_loginView.ShowDialog() == DialogResult.OK)
+            {
+                MessageBox.Show("Zalogowano pomyœlnie!", "Sukces", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("Logowanie nie powiod³o siê lub zosta³o anulowane.", "B³¹d", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
