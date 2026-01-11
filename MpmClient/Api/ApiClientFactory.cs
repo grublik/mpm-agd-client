@@ -6,21 +6,28 @@ namespace MpmClient.Api
 {
     internal sealed class ApiClientFactory
     {
+        private readonly Func<string> _baseUrlProvider;
         private readonly TokenStore _tokenStore;
 
-        public ApiClientFactory(TokenStore tokenStore)
+        public ApiClientFactory(TokenStore tokenStore, Func<string> baseUrlProvider)
         {
             _tokenStore = tokenStore;
+            _baseUrlProvider = baseUrlProvider;
         }
 
         public HttpClient CreateHttpClient()
         {
-            var handler = new BearerAuthHandler(_tokenStore)
-            {
-                InnerHandler = new HttpClientHandler()
-            };
+            var handlerChain =
+                new JwtRefreshHandler(_tokenStore, _baseUrlProvider)
+                {
+                    InnerHandler =
+                        new BearerAuthHandler(_tokenStore)
+                        {
+                            InnerHandler = new HttpClientHandler()
+                        }
+                };
 
-            return new HttpClient(handler, disposeHandler: true);
+            return new HttpClient(handlerChain, disposeHandler: true);
         }
 
         public TokenClient CreateTokenClient(string baseUrl, HttpClient httpClient)
@@ -37,9 +44,11 @@ namespace MpmClient.Api
             if (string.IsNullOrWhiteSpace(baseUrl))
                 return string.Empty;
 
-            // Accept "127.0.0.1:8000" and "http://127.0.0.1:8000"
             if (!baseUrl.Contains("://", StringComparison.Ordinal))
                 baseUrl = "http://" + baseUrl;
+
+            if (!baseUrl.EndsWith("/", StringComparison.Ordinal))
+                baseUrl += "/";
 
             return baseUrl;
         }
