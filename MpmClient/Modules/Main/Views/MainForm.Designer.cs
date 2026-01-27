@@ -30,6 +30,7 @@
         {
             menuStripMain = new MenuStrip();
             dockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
+            vS2015BlueTheme = new WeifenLuo.WinFormsUI.Docking.VS2015BlueTheme();
             SuspendLayout();
             // 
             // menuStripMain
@@ -45,12 +46,15 @@
             // 
             dockPanel.AutoSize = true;
             dockPanel.Dock = DockStyle.Fill;
-            dockPanel.DockBackColor = SystemColors.ControlDark;
+            dockPanel.DockBackColor = Color.FromArgb(41, 57, 85);
             dockPanel.DocumentStyle = WeifenLuo.WinFormsUI.Docking.DocumentStyle.DockingMdi;
             dockPanel.Location = new Point(0, 24);
             dockPanel.Name = "dockPanel";
+            dockPanel.Padding = new Padding(6);
+            dockPanel.ShowAutoHideContentOnHover = false;
             dockPanel.Size = new Size(1194, 581);
             dockPanel.TabIndex = 1;
+            dockPanel.Theme = vS2015BlueTheme;
             // 
             // MainForm
             // 
@@ -71,5 +75,6 @@
 
         private MenuStrip menuStripMain;
         private WeifenLuo.WinFormsUI.Docking.DockPanel dockPanel;
+        private WeifenLuo.WinFormsUI.Docking.VS2015BlueTheme vS2015BlueTheme;
     }
 }

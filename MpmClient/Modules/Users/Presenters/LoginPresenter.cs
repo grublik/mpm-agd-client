@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using MpmClient.Api;
-using MpmClient.Modules.Users.Views;
+using MpmClient.Modules.Users.Views.Interface;
 using MpmClient.Security;
 
 namespace MpmClient.Modules.Users.Presenters
@@ -66,12 +66,6 @@ namespace MpmClient.Modules.Users.Presenters
             };
 
             var tokenPair = await tokenClient.CreateAsync(request, _view.Login, _view.Password).ConfigureAwait(false);
-
-            // In your generated schema, tokens are typically returned via additional properties
-            // OR via strongly typed properties (depends on API).
-            // If tokens are not present, you may need to inspect the actual response schema.
-            // For now, assume typical DRF JWT: { "access": "...", "refresh": "..." } in AdditionalProperties.
-
 
             if (string.IsNullOrWhiteSpace(tokenPair.Access) || string.IsNullOrWhiteSpace(tokenPair.Refresh))
                 throw new InvalidOperationException("Token response contains empty access/refresh tokens.");

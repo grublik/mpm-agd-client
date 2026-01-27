@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MpmClient.Modules.Users.Views
+namespace MpmClient.Modules.Users.Views.Interface
 {
     internal interface ILoginView
     {
