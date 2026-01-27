@@ -19,15 +19,8 @@ namespace MpmClient
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
-            var tokenStore = new TokenStore();
-
-            // Read base URL lazily (always current, after login saves it).
-            var apiClientFactory = new ApiClientFactory(
-                tokenStore,
-                () => Settings.Default.MpmApiServerAddr);
-
             var loginForm = new LoginForm();
-            loginForm.Tag = new LoginPresenter(loginForm, apiClientFactory, tokenStore);
+            loginForm.Tag = new LoginPresenter(loginForm, AppServices.ApiClientFactory, AppServices.TokenStore);
 
             var mainForm = new MainForm(loginForm);
             mainForm.Tag = new MainFormPresenter(mainForm, loginForm);

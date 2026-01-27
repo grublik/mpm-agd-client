@@ -26,8 +26,14 @@ namespace MpmClient.Api
                             InnerHandler = new HttpClientHandler()
                         }
                 };
+        
+            var httpClient = new HttpClient(handlerChain, disposeHandler: true);
 
-            return new HttpClient(handlerChain, disposeHandler: true);
+            var baseUrl = NormalizeBaseUrl(_baseUrlProvider());
+            if (!string.IsNullOrWhiteSpace(baseUrl))
+                httpClient.BaseAddress = new Uri(baseUrl, UriKind.Absolute);
+
+            return httpClient;
         }
 
         public TokenClient CreateTokenClient(string baseUrl, HttpClient httpClient)

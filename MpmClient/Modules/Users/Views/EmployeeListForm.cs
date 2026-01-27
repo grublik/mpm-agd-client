@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using MpmClient.Modules.Users.Views.Interface;
+using MpmClient.Api;
 
 namespace MpmClient.Modules.Users.Views
 {
@@ -15,11 +16,14 @@ namespace MpmClient.Modules.Users.Views
         public EmployeeListForm()
         {
             InitializeComponent();
+
+            this.Load += (s, e) => LoadEmployeeList(s, e);
         }
 
-        public void SetEmployeesData(object data)
+        public event EventHandler LoadEmployeeList = delegate { };
+        public void SetEmployeesData(ICollection<UserEmployee> data)
         {
-            throw new NotImplementedException();
+            dataGridView.DataSource = data;
         }
     }
 }
